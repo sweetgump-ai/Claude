@@ -1,0 +1,681 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>지윤이에게 온 축하 카드 💌</title>
+<meta name="description" content="버튼을 눌러 선물을 열어보세요!">
+<meta property="og:title" content="지윤이에게 도착한 축하 카드 💌">
+<meta property="og:description" content="버튼을 눌러 선물을 열어보세요! 🎁">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ffb3cf">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #ff6fa5;
+    --pink2: #ffb3cf;
+    --yellow: #ffd84d;
+    --mint: #5fd3b6;
+    --sky: #6ec3ff;
+    --purple: #9b7bff;
+    --ink: #3b2a4a;
+    --paper: #fffaf3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Gowun Dodum', 'Jua', sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, #ffe3ef 0%, #fff3d6 50%, #dff4ff 100%);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { font: inherit; }
+  .jua { font-family: 'Jua', sans-serif; }
+
+  #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+
+  .screen {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    padding: 24px 16px;
+    overflow-x: hidden; overflow-y: auto;
+    opacity: 0; visibility: hidden;
+    transition: opacity .6s, visibility .6s;
+    z-index: 10;
+  }
+  .screen.active { opacity: 1; visibility: visible; }
+  .screen > .wrap { margin: auto; width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+  /* ---------- 사운드 버튼 ---------- */
+  #soundBtn {
+    position: fixed; top: 12px; right: 12px; z-index: 80;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,.85);
+    box-shadow: 0 3px 10px rgba(0,0,0,.12);
+    font-size: 20px; cursor: pointer;
+  }
+
+  /* ---------- 1. 카드 ---------- */
+  .deco { position: fixed; font-size: 30px; opacity: .7; animation: floaty 6s ease-in-out infinite; pointer-events: none; }
+  .card {
+    position: relative;
+    width: min(420px, 100%);
+    background: var(--paper);
+    border-radius: 28px;
+    padding: 46px 26px 32px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(255,111,165,.28);
+    animation: cardIn 1s cubic-bezier(.2,1.4,.4,1) both;
+    margin-top: 24px;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 10px;
+    border: 2px dashed var(--pink2); border-radius: 20px; pointer-events: none;
+  }
+  .ribbon { position: absolute; top: -36px; left: 50%; font-size: 64px; transform: translateX(-50%); animation: bob 2.4s ease-in-out infinite; }
+  .to { font-family: 'Jua'; color: #b48aa8; font-size: 17px; }
+  .card h1 {
+    font-family: 'Jua'; font-weight: 400;
+    font-size: clamp(36px, 10vw, 48px); line-height: 1.25;
+    color: var(--pink); margin: 10px 0 18px;
+  }
+  .card h1 .name {
+    background: linear-gradient(90deg, #ff6fa5, #9b7bff, #6ec3ff);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .msg { font-size: 17px; line-height: 1.8; white-space: pre-line; word-break: keep-all; }
+  .from { margin-top: 18px; font-family: 'Jua'; color: #a0789a; white-space: pre-line; line-height: 1.5; }
+  .big-btn {
+    margin-top: 28px;
+    font-family: 'Jua'; font-size: 23px;
+    padding: 16px 36px; border: none; border-radius: 999px;
+    background: linear-gradient(135deg, #ff6fa5, #ff9a6c); color: #fff;
+    box-shadow: 0 7px 0 #d94f86, 0 14px 24px rgba(255,111,165,.4);
+    cursor: pointer; animation: pulse 1.6s ease-in-out infinite;
+  }
+  .big-btn:active { animation: none; transform: translateY(5px); box-shadow: 0 2px 0 #d94f86; }
+
+  /* ---------- 2. 모션그래픽 ---------- */
+  #s-intro { background: radial-gradient(circle at 50% 40%, #3a2378 0%, #1b0f40 60%, #0e0726 100%); align-items: center; justify-content: center; overflow: hidden; }
+  .rays {
+    position: absolute; left: 50%; top: 45%;
+    width: 220vmax; height: 220vmax; margin: -110vmax 0 0 -110vmax;
+    background: repeating-conic-gradient(rgba(255,255,255,.07) 0deg 8deg, transparent 8deg 16deg);
+    animation: spin 24s linear infinite;
+  }
+  .stars { position: absolute; inset: 0; }
+  .stars i { position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; animation: twinkle 1.8s ease-in-out infinite; }
+  .intro-text {
+    position: relative; z-index: 2; text-align: center;
+    font-family: 'Jua'; color: #fff;
+    font-size: clamp(32px, 9vw, 64px); line-height: 1.35;
+    text-shadow: 0 0 18px rgba(255,170,220,.9), 0 4px 0 #ff6fa5;
+    padding: 0 12px;
+  }
+  .intro-text .row { display: block; }
+  .intro-text .word { display: inline-block; white-space: nowrap; }
+  .intro-text .ch { display: inline-block; animation: dropIn .6s cubic-bezier(.2,1.8,.4,1) both; }
+  .progress { position: absolute; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(320px, 70%); height: 8px; border-radius: 99px; background: rgba(255,255,255,.18); overflow: hidden; z-index: 2; }
+  #introBar { height: 100%; width: 0; background: linear-gradient(90deg, #ff6fa5, #ffd84d, #5fd3b6); border-radius: 99px; }
+
+  /* ---------- 3. 퀴즈 ---------- */
+  .quiz-card {
+    width: min(460px, 100%);
+    background: #fff; border-radius: 26px;
+    padding: 26px 20px 22px; text-align: center;
+    box-shadow: 0 18px 40px rgba(155,123,255,.22);
+  }
+  .quiz-card.swap .q-body { animation: slideIn .45s ease-out both; }
+  .dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .dot { width: 34px; height: 34px; border-radius: 50%; background: #f3e9f2; display: grid; place-items: center; font-family: 'Jua'; color: #b9a3b5; font-size: 15px; transition: .3s; }
+  .dot.cur { background: var(--yellow); color: var(--ink); transform: scale(1.15); }
+  .dot.done { background: var(--mint); color: #fff; }
+  .qnum { font-family: 'Jua'; color: var(--purple); font-size: 16px; }
+  #qtext { font-family: 'Jua'; font-weight: 400; font-size: clamp(22px, 6.2vw, 28px); line-height: 1.4; margin: 8px 0 20px; word-break: keep-all; }
+  .options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .opt {
+    font-family: 'Jua'; font-size: 19px; color: var(--ink);
+    min-height: 74px; padding: 14px 8px;
+    border-radius: 18px; border: 3px solid #f3d9e6; background: #fff7fb;
+    cursor: pointer; transition: transform .15s, border-color .15s; word-break: keep-all;
+  }
+  .opt:hover { transform: translateY(-2px); border-color: var(--pink); }
+  .opt.correct { background: var(--mint); border-color: #3fb898; color: #fff; animation: pop .45s; }
+  .opt.wrong { background: #ffe4e4; border-color: #ff9a9a; color: #c0396b; opacity: .55; animation: shake .4s; cursor: default; }
+  .feedback { min-height: 30px; margin-top: 16px; font-family: 'Jua'; font-size: 19px; word-break: keep-all; }
+  .feedback.ok { color: #2fae8c; }
+  .feedback.no { color: #e0507f; }
+
+  /* ---------- 4. 경품 ---------- */
+  .prize-title { font-family: 'Jua'; font-weight: 400; font-size: clamp(28px, 8vw, 40px); color: var(--pink); text-shadow: 0 3px 0 #fff; text-align: center; }
+  .prize-sub { font-family: 'Jua'; font-size: 19px; margin-top: 6px; text-align: center; }
+  .boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; width: min(440px, 100%); margin: 24px 0 16px; }
+  .box {
+    aspect-ratio: 1; border: none; border-radius: 22px;
+    background: var(--c); box-shadow: 0 6px 0 rgba(0,0,0,.1);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    cursor: pointer; color: var(--ink);
+    animation: wiggle 2.2s ease-in-out infinite; animation-delay: var(--d);
+  }
+  .box .em { font-size: clamp(40px, 12vw, 56px); line-height: 1; }
+  .box .lb { font-family: 'Jua'; font-size: clamp(14px, 4vw, 18px); }
+  .box:disabled { cursor: default; animation: none; }
+  .box.flip { animation: flipOut .25s ease-in forwards; }
+  .box.flip.win { animation: flipIn .3s ease-out, glow .9s .3s ease-in-out infinite alternate; background: linear-gradient(135deg, #ffe66d, #ffae2e); color: #8a4b00; }
+  .box.flip.lose { animation: flipIn .3s ease-out; background: #ece7f1; color: #8d8296; }
+  #prizeHint { font-family: 'Jua'; font-size: 18px; min-height: 26px; text-align: center; }
+  .after-btns { display: none; gap: 10px; margin-top: 16px; flex-wrap: wrap; justify-content: center; }
+  .after-btns.show { display: flex; }
+  .small-btn {
+    font-family: 'Jua'; font-size: 18px;
+    padding: 12px 22px; border: none; border-radius: 999px;
+    background: var(--purple); color: #fff; cursor: pointer;
+    box-shadow: 0 5px 0 #7558d9;
+  }
+  .small-btn.alt { background: #fff; color: var(--purple); box-shadow: 0 5px 0 #ddd3ff; }
+  .small-btn:active { transform: translateY(4px); box-shadow: none; }
+
+  /* ---------- 쿠폰 ---------- */
+  .modal {
+    position: fixed; inset: 0; z-index: 45;
+    background: rgba(40,20,60,.55);
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+    opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s;
+  }
+  .modal.show { opacity: 1; visibility: visible; }
+  .coupon {
+    width: min(400px, 100%);
+    background: linear-gradient(135deg, #fff6d8, #ffe0ec);
+    border: 3px dashed #ff9cc2; border-radius: 22px;
+    padding: 26px 22px 22px; text-align: center;
+    transform: scale(.5) rotate(-8deg);
+    transition: transform .6s cubic-bezier(.2,1.6,.4,1);
+    box-shadow: 0 20px 50px rgba(0,0,0,.25);
+  }
+  .modal.show .coupon { transform: none; }
+  .c-top { font-family: 'Jua'; letter-spacing: 3px; color: #d94f86; font-size: 15px; }
+  .c-title { font-family: 'Jua'; font-size: 22px; margin-top: 8px; }
+  .c-amount { font-family: 'Jua'; font-size: clamp(50px, 15vw, 68px); color: #ff4f88; text-shadow: 3px 3px 0 #ffd84d; line-height: 1.15; margin: 6px 0; }
+  .c-amount small { font-size: .45em; margin-left: 4px; }
+  .c-divider { border-top: 2px dashed #f0b6cd; margin: 14px 0; }
+  .c-meta { font-size: 14px; line-height: 1.85; color: #7a5a75; }
+  .c-tip { margin: 14px 0 18px; font-size: 14px; background: #fff; border-radius: 12px; padding: 10px; word-break: keep-all; }
+
+  /* ---------- 애니메이션 ---------- */
+  @keyframes cardIn { from { opacity: 0; transform: translateY(40px) scale(.9); } to { opacity: 1; transform: none; } }
+  @keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0) rotate(-6deg); } 50% { transform: translateX(-50%) translateY(-8px) rotate(6deg); } }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-18px) rotate(8deg); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes twinkle { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
+  @keyframes dropIn { from { opacity: 0; transform: translateY(-60px) scale(.3) rotate(-20deg); } to { opacity: 1; transform: none; } }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
+  @keyframes wiggle { 0%,80%,100% { transform: rotate(0); } 85% { transform: rotate(-7deg); } 90% { transform: rotate(7deg); } 95% { transform: rotate(-4deg); } }
+  @keyframes flipOut { to { transform: rotateY(90deg); } }
+  @keyframes flipIn { from { transform: rotateY(90deg); } to { transform: rotateY(0); } }
+  @keyframes glow { from { box-shadow: 0 0 0 0 rgba(255,200,40,.7), 0 6px 0 rgba(0,0,0,.1); transform: scale(1); } to { box-shadow: 0 0 28px 8px rgba(255,200,40,.8), 0 6px 0 rgba(0,0,0,.1); transform: scale(1.06); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rays, .deco, .big-btn, .box { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="fx" aria-hidden="true"></canvas>
+<button id="soundBtn" aria-label="소리 켜기/끄기">🔊</button>
+
+<!-- 1. 축하 카드 -->
+<section id="s-card" class="screen active">
+  <span class="deco" style="top:8%;left:6%">🎈</span>
+  <span class="deco" style="top:14%;right:10%;animation-delay:-2s">⭐</span>
+  <span class="deco" style="bottom:12%;left:10%;animation-delay:-4s">💖</span>
+  <span class="deco" style="bottom:8%;right:8%;animation-delay:-1s">🌸</span>
+  <div class="wrap">
+    <div class="card">
+      <div class="ribbon">🎀</div>
+      <p class="to" id="cardTo"></p>
+      <h1><span class="name" id="cardName"></span><br>축하해! 🎉</h1>
+      <p class="msg" id="cardMsg"></p>
+      <p class="from" id="cardFrom"></p>
+      <button id="openBtn" class="big-btn">🎁 선물 열어보기</button>
+    </div>
+  </div>
+</section>
+
+<!-- 2. 모션그래픽 -->
+<section id="s-intro" class="screen" aria-live="polite">
+  <div class="rays"></div>
+  <div class="stars" id="stars"></div>
+  <div class="intro-text" id="introText"></div>
+  <div class="progress"><div id="introBar"></div></div>
+</section>
+
+<!-- 3. 퀴즈 -->
+<section id="s-quiz" class="screen">
+  <div class="wrap">
+    <div class="quiz-card" id="quizCard">
+      <div class="dots" id="dots"></div>
+      <div class="q-body">
+        <p class="qnum" id="qnum"></p>
+        <h2 id="qtext"></h2>
+        <div class="options" id="options"></div>
+      </div>
+      <p class="feedback" id="feedback" aria-live="polite"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 4. 경품 선택 -->
+<section id="s-prize" class="screen">
+  <div class="wrap">
+    <h2 class="prize-title">🏆 5문제 모두 정답!</h2>
+    <p class="prize-sub">선물 상자 하나를 골라봐!</p>
+    <div class="boxes" id="boxes"></div>
+    <p id="prizeHint" aria-live="polite"></p>
+    <div class="after-btns" id="afterBtns">
+      <button class="small-btn" id="reopenCoupon">🎟️ 쿠폰 다시 보기</button>
+      <button class="small-btn alt" id="restartBtn">↺ 처음부터</button>
+    </div>
+  </div>
+</section>
+
+<!-- 쿠폰 -->
+<div class="modal" id="couponModal" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+  <div class="coupon">
+    <div class="c-top">🎟️ SPECIAL COUPON</div>
+    <div class="c-title" id="cTitle"></div>
+    <div class="c-amount" id="cAmount"></div>
+    <div class="c-divider"></div>
+    <div class="c-meta">
+      발행인: <span id="cIssuer"></span><br>
+      발행일: <span id="cDate"></span><br>
+      유효기간: 무기한 ♾️<br>
+      <span id="cNo"></span>
+    </div>
+    <div class="c-tip">📸 이 화면을 캡처해서 엄마·아빠에게 보여주세요!</div>
+    <button class="small-btn" id="closeCoupon">확인 💖</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   ✏️ 여기만 고치면 내용이 바뀝니다
+   ========================================================= */
+const CONFIG = {
+  name: '지윤',            // 이름
+  callName: '지윤아,',     // 부를 때 (카드 제목)
+  nick: '지윤이',          // ~이 (쿠폰 등)
+  to: 'To. 사랑하는 우리 딸',
+  message:
+    '6학년 지윤이,\n' +
+    '요즘 하루하루 멋지게 자라는 모습이\n' +
+    '엄마·아빠는 정말 자랑스러워!\n' +
+    '작은 선물을 준비했으니\n아래 버튼을 눌러봐 😊',
+  from: '세상에서 지윤이를 제일 사랑하는\n엄마·아빠가 💕',
+  issuer: '엄마·아빠 💕',
+
+  introSeconds: 10,        // 모션그래픽 시간(초)
+  introLines: [            // 모션그래픽 문구 (한 줄 = 배열 하나)
+    ['두근두근… 💓'],
+    ['지윤아!'],
+    ['정말 정말', '축하해! 🎉'],
+    ['특별한 선물이', '기다리고 있어 🎁'],
+    ['그 전에!', '퀴즈 5문제', '도전! 🧩'],
+  ],
+
+  // answer = 정답 보기 번호 (0부터 시작: 첫 번째=0, 두 번째=1 …)
+  quiz: [
+    { q: '지윤이는 지금 몇 학년일까? 🏫',
+      options: ['4학년', '5학년', '6학년', '중학교 1학년'], answer: 2 },
+    { q: '지윤이가 가장 좋아하는 음식은? 🍽️',            // ✏️ 실제 정보로 바꿔주세요
+      options: ['떡볶이', '마라탕', '치킨', '피자'], answer: 0,
+      hint: '맵고 쫄깃한 그것!' },
+    { q: '지윤이의 생일은 몇 월일까? 🎂',                // ✏️ 실제 정보로 바꿔주세요
+      options: ['3월', '5월', '8월', '11월'], answer: 1 },
+    { q: '엄마·아빠가 지윤이에게 제일 하고 싶은 말은? 💬',
+      options: ['숙제 다 했어?', '일찍 자야지!', '사랑해 💕', '밥 먹자~'], answer: 2,
+      hint: '가장 따뜻한 말을 골라봐!' },
+    { q: '세상에서 지윤이를 제일 사랑하는 사람은? 💖',
+      options: ['옆집 고양이', '담임 선생님', '엄마·아빠', '유튜브 알고리즘'], answer: 2 },
+  ],
+
+  boxCount: 6,
+  prizeAmount: '50,000',
+  prizeLabel: '용돈 5만원!',
+};
+/* ========================================================= */
+
+const $ = s => document.querySelector(s);
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.random() * a.length | 0];
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+}
+
+/* ---------- 텍스트 채우기 ---------- */
+$('#cardTo').textContent = CONFIG.to;
+$('#cardName').textContent = CONFIG.callName;
+$('#cardMsg').textContent = CONFIG.message;
+$('#cardFrom').textContent = CONFIG.from;
+$('#cTitle').textContent = `${CONFIG.nick} 전용 용돈 쿠폰`;
+$('#cAmount').innerHTML = `${CONFIG.prizeAmount}<small>원</small>`;
+$('#cIssuer').textContent = CONFIG.issuer;
+
+/* ---------- 사운드 (Web Audio, 외부 파일 없음) ---------- */
+let actx = null, master = null, soundOn = true;
+function ac() {
+  if (!actx) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    actx = new C();
+    master = actx.createGain();
+    master.gain.value = 1;
+    master.connect(actx.destination);
+  }
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function tone(f, t = 0, d = .2, type = 'sine', v = .12) {
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  const s = a.currentTime + t;
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(0, s);
+  g.gain.linearRampToValueAtTime(v, s + .02);
+  g.gain.exponentialRampToValueAtTime(.001, s + d);
+  o.connect(g); g.connect(master);
+  o.start(s); o.stop(s + d + .05);
+}
+const N = { C3:130.81, F3:174.61, G3:196, A3:220, G4:392, C5:523.25, D5:587.33, E5:659.25, F5:698.46, G5:783.99, A5:880, C6:1046.5 };
+const sfx = {
+  open()    { [N.C5, N.E5, N.G5, N.C6].forEach((f, i) => tone(f, i * .09, .35, 'triangle')); },
+  correct() { tone(N.E5, 0, .15, 'triangle'); tone(N.A5, .1, .4, 'triangle'); },
+  wrong()   { tone(180, 0, .18, 'square', .05); tone(140, .15, .25, 'square', .05); },
+  pop()     { tone(rnd(500, 900), 0, .08, 'sine', .03); },
+  boop()    { tone(330, 0, .2, 'sine', .07); tone(247, .1, .25, 'sine', .07); },
+  fanfare() {
+    [[N.G4,0],[N.C5,.12],[N.E5,.24],[N.G5,.36],[N.E5,.6],[N.G5,.72],[N.C6,.84]]
+      .forEach(([f, t]) => tone(f, t, .35, 'triangle', .13));
+    tone(N.C5, .84, 1, 'sine', .08); tone(N.E5, .84, 1, 'sine', .08);
+  },
+  intro(sec) {
+    const mel = ['C5',1,'E5',1,'G5',1,'E5',1, 'F5',1,'A5',1,'G5',2, 'E5',1,'G5',1,'C6',1,'G5',1,
+                 'A5',1,'G5',1,'E5',2, 'F5',1,'E5',1,'D5',1,'G5',1];
+    const beat = (sec - .8) / 20;
+    let t = 0;
+    for (let i = 0; i < mel.length; i += 2) {
+      tone(N[mel[i]], t, mel[i + 1] * beat * .95, 'triangle', .07);
+      t += mel[i + 1] * beat;
+    }
+    ['C3','F3','C3','A3','G3'].forEach((n, i) => tone(N[n], i * 4 * beat, 4 * beat, 'sine', .09));
+  },
+};
+$('#soundBtn').onclick = () => {
+  soundOn = !soundOn;
+  $('#soundBtn').textContent = soundOn ? '🔊' : '🔇';
+  if (ac()) master.gain.value = soundOn ? 1 : 0;
+};
+
+/* ---------- 파티클 (꽃가루 / 불꽃놀이) ---------- */
+const cvs = $('#fx'), ctx = cvs.getContext('2d');
+let W = 0, H = 0;
+function resize() {
+  const d = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cvs.width = W * d; cvs.height = H * d;
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+}
+addEventListener('resize', resize); resize();
+
+const P = [];
+const COLORS = ['#ff6fa5', '#ffd84d', '#5fd3b6', '#6ec3ff', '#9b7bff', '#ff9a6c'];
+const cut = n => REDUCED ? Math.ceil(n / 3) : n;
+
+function confetti(x, y, n = 60, power = 10) {
+  for (let i = 0; i < cut(n); i++) {
+    const ang = rnd(-Math.PI * .95, -Math.PI * .05), sp = rnd(power * .4, power);
+    P.push({ k: 'c', x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+      w: rnd(6, 11), h: rnd(4, 7), r: rnd(0, 6.28), vr: rnd(-.3, .3), col: pick(COLORS), life: rnd(160, 240) });
+  }
+}
+function rain(n = 100) {
+  for (let i = 0; i < cut(n); i++) {
+    P.push({ k: 'c', x: rnd(0, W), y: rnd(-H * .6, -10), vx: rnd(-1, 1), vy: rnd(1, 3),
+      w: rnd(6, 11), h: rnd(4, 7), r: rnd(0, 6.28), vr: rnd(-.3, .3), col: pick(COLORS), life: 600 });
+  }
+}
+function burst(x, y, hue) {
+  const n = cut(60);
+  for (let i = 0; i < n; i++) {
+    const ang = i / n * Math.PI * 2 + rnd(-.1, .1), sp = rnd(2, 5.5);
+    P.push({ k: 's', x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp,
+      col: `hsl(${hue + rnd(-25, 25)},100%,${rnd(60, 75)}%)`, life: rnd(55, 85), max: 85, sz: rnd(1.6, 3) });
+  }
+}
+function rocket() {
+  const ty = rnd(H * .12, H * .42);
+  P.push({ k: 'r', x: rnd(W * .12, W * .88), y: H + 10, vx: rnd(-.8, .8),
+    vy: -Math.sqrt(2 * .08 * (H - ty)) * 1.08, ty, hue: rnd(0, 360) });
+}
+
+function tick() {
+  ctx.clearRect(0, 0, W, H);
+  for (let i = P.length - 1; i >= 0; i--) {
+    const p = P[i];
+    if (p.k === 'c') {
+      p.vy = Math.min(p.vy + .18, 3.6); p.vx *= .985;
+      p.x += p.vx + Math.sin(p.r) * .6; p.y += p.vy; p.r += p.vr; p.life--;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.col; ctx.fillRect(-p.w / 2, -p.h / 2 * Math.abs(Math.cos(p.r * 1.3)), p.w, p.h * Math.abs(Math.cos(p.r * 1.3)) + .5);
+      ctx.restore();
+      if (p.y > H + 20 || p.life <= 0) P.splice(i, 1);
+    } else if (p.k === 's') {
+      p.vy += .05; p.vx *= .98; p.vy *= .98; p.x += p.vx; p.y += p.vy; p.life--;
+      ctx.globalAlpha = Math.max(p.life / p.max, 0);
+      ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, 6.283); ctx.fill();
+      ctx.globalAlpha = 1;
+      if (p.life <= 0) P.splice(i, 1);
+    } else {
+      p.vy += .08; p.x += p.vx; p.y += p.vy;
+      ctx.strokeStyle = `hsl(${p.hue},100%,80%)`; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 3, p.y - p.vy * 3); ctx.stroke();
+      if (p.y <= p.ty || p.vy > -.5) { burst(p.x, p.y, p.hue); sfx.pop(); P.splice(i, 1); }
+    }
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+
+/* ---------- 1 → 2. 카드 버튼 ---------- */
+$('#openBtn').onclick = e => {
+  e.currentTarget.disabled = true;
+  ac(); sfx.open();
+  const [x, y] = centerOf(e.currentTarget);
+  confetti(x, y, 90, 13);
+  setTimeout(startIntro, 700);
+};
+
+/* ---------- 2. 모션그래픽 (약 10초) ---------- */
+const graphemes = s => window.Intl && Intl.Segmenter
+  ? [...new Intl.Segmenter('ko', { granularity: 'grapheme' }).segment(s)].map(x => x.segment)
+  : [...s];
+
+function showLine(rows) {
+  const el = $('#introText');
+  el.innerHTML = '';
+  let k = 0;
+  rows.forEach(row => {
+    const r = document.createElement('span'); r.className = 'row';
+    row.split(' ').forEach((word, wi) => {
+      if (wi) r.appendChild(document.createTextNode(' '));
+      const w = document.createElement('span'); w.className = 'word';
+      graphemes(word).forEach(ch => {
+        const c = document.createElement('span'); c.className = 'ch';
+        c.textContent = ch; c.style.animationDelay = (k++ * 55) + 'ms';
+        w.appendChild(c);
+      });
+      r.appendChild(w);
+    });
+    el.appendChild(r);
+  });
+}
+
+function startIntro() {
+  show('s-intro');
+  const stars = $('#stars');
+  for (let i = 0; i < 40; i++) {
+    const s = document.createElement('i');
+    s.style.left = rnd(0, 100) + '%'; s.style.top = rnd(0, 100) + '%';
+    s.style.animationDelay = rnd(0, 2) + 's';
+    stars.appendChild(s);
+  }
+  const total = CONFIG.introSeconds * 1000;
+  const bar = $('#introBar');
+  requestAnimationFrame(() => { bar.style.transition = `width ${total}ms linear`; bar.style.width = '100%'; });
+
+  sfx.intro(CONFIG.introSeconds);
+  const step = total / CONFIG.introLines.length;
+  CONFIG.introLines.forEach((ln, i) => setTimeout(() => showLine(ln), i * step));
+
+  rain(80);
+  setTimeout(() => rain(120), total * .55);
+  const fw = setInterval(rocket, REDUCED ? 1200 : 420);
+  setTimeout(() => { clearInterval(fw); startQuiz(); }, total);
+}
+
+/* ---------- 3. 퀴즈 ---------- */
+const PRAISE = ['정답! 역시 지윤이 👏', '딩동댕! 천재인데? ✨', '맞았어! 대단해 💯', '정답! 엄마·아빠 감동 😭', '완벽해! 🎯'];
+const OOPS = ['땡! 다시 골라봐 🤭', '아쉽다~ 한 번 더! 💪', '음… 다른 걸 골라볼까? 🤔'];
+let qi = 0, locked = false;
+
+function startQuiz() {
+  show('s-quiz');
+  qi = 0;
+  renderDots(); renderQ();
+}
+function renderDots() {
+  $('#dots').innerHTML = CONFIG.quiz.map((_, i) =>
+    `<div class="dot ${i < qi ? 'done' : i === qi ? 'cur' : ''}">${i < qi ? '✓' : i + 1}</div>`).join('');
+}
+function feedback(text, cls = '') {
+  const f = $('#feedback'); f.textContent = text; f.className = 'feedback ' + cls;
+}
+function renderQ() {
+  const q = CONFIG.quiz[qi];
+  const card = $('#quizCard');
+  card.classList.remove('swap'); void card.offsetWidth; card.classList.add('swap');
+  $('#qnum').textContent = `문제 ${qi + 1} / ${CONFIG.quiz.length}`;
+  $('#qtext').textContent = q.q;
+  feedback('');
+  const box = $('#options'); box.innerHTML = '';
+  q.options.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.className = 'opt'; b.textContent = t;
+    b.onclick = () => choose(b, i);
+    box.appendChild(b);
+  });
+  locked = false;
+}
+function choose(btn, i) {
+  if (locked || btn.disabled) return;
+  const q = CONFIG.quiz[qi];
+  if (i === q.answer) {
+    locked = true;
+    btn.classList.add('correct');
+    sfx.correct();
+    const [x, y] = centerOf(btn); confetti(x, y, 45, 9);
+    feedback(pick(PRAISE), 'ok');
+    setTimeout(() => {
+      qi++; renderDots();
+      qi < CONFIG.quiz.length ? renderQ() : finishQuiz();
+    }, 1200);
+  } else {
+    btn.classList.add('wrong'); btn.disabled = true;
+    sfx.wrong();
+    feedback(q.hint ? `땡! 💡 힌트: ${q.hint}` : pick(OOPS), 'no');
+  }
+}
+function finishQuiz() {
+  $('#qnum').textContent = '';
+  $('#qtext').textContent = '🎉 5문제 모두 정답! 🎉';
+  $('#options').innerHTML = '';
+  feedback('이제 선물을 고르러 가자! 🎁', 'ok');
+  sfx.fanfare(); rain(160);
+  setTimeout(showPrize, 2000);
+}
+
+/* ---------- 4. 경품 선택 (첫 선택은 무조건 당첨!) ---------- */
+const BOX_COLORS = ['#ffb3cf', '#ffe07a', '#9fe6d3', '#a9dbff', '#cdb9ff', '#ffc3a0'];
+let picked = false;
+
+function showPrize() {
+  show('s-prize');
+  const wrap = $('#boxes'); wrap.innerHTML = '';
+  picked = false;
+  for (let i = 0; i < CONFIG.boxCount; i++) {
+    const b = document.createElement('button');
+    b.className = 'box';
+    b.style.setProperty('--c', BOX_COLORS[i % BOX_COLORS.length]);
+    b.style.setProperty('--d', (i * .18) + 's');
+    b.setAttribute('aria-label', `선물 상자 ${i + 1}`);
+    b.innerHTML = '<span class="em">🎁</span>';
+    b.onclick = () => pickBox(b);
+    wrap.appendChild(b);
+  }
+  $('#prizeHint').textContent = '기회는 딱 한 번! 신중하게 골라봐 🤭';
+}
+function reveal(b, win) {
+  b.classList.add('flip');
+  setTimeout(() => {
+    b.innerHTML = win
+      ? `<span class="em">💰</span><span class="lb">${CONFIG.prizeLabel}</span>`
+      : '<span class="em">😜</span><span class="lb">꽝</span>';
+    b.classList.add(win ? 'win' : 'lose');
+  }, 250);
+}
+function pickBox(b) {
+  if (picked) return;
+  picked = true;
+  const all = [...document.querySelectorAll('.box')];
+  all.forEach(x => x.disabled = true);
+
+  // 어떤 상자를 골라도 첫 번째로 고른 상자가 당첨
+  reveal(b, true);
+  sfx.fanfare();
+  const [x, y] = centerOf(b); confetti(x, y, 120, 14);
+  setTimeout(() => rain(160), 300);
+  $('#prizeHint').textContent = '🎉 대박!! 당첨이야!! 🎉';
+
+  const others = all.filter(x => x !== b);
+  others.forEach((o, i) => setTimeout(() => { reveal(o, false); sfx.boop(); }, 1400 + i * 240));
+  setTimeout(() => {
+    $('#prizeHint').textContent = '나머지는 전부 꽝이었어! 지윤이 운 최고 🍀';
+    openCoupon();
+    $('#afterBtns').classList.add('show');
+  }, 1400 + others.length * 240 + 700);
+}
+
+function openCoupon() {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  $('#cDate').textContent = ymd;
+  $('#cNo').textContent = `No. JY-${ymd.replaceAll('.', '')}-0001`;
+  $('#couponModal').classList.add('show');
+  sfx.fanfare(); rain(100);
+}
+$('#closeCoupon').onclick = () => $('#couponModal').classList.remove('show');
+$('#reopenCoupon').onclick = openCoupon;
+$('#restartBtn').onclick = () => location.reload();
+</script>
+</body>
+</html>
