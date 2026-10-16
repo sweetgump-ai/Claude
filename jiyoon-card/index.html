@@ -108,10 +108,21 @@
   }
   .stars { position: absolute; inset: 0; }
   .stars i { position: absolute; width: 3px; height: 3px; background: #fff; border-radius: 50%; animation: twinkle 1.8s ease-in-out infinite; }
+  .intro-stage { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .pile { position: relative; width: min(62vw, 300px, 36vh); aspect-ratio: 1 / 1.18; }
+  .pile:empty { display: none; }
+  .pile .polaroid { position: absolute; inset: 0; animation: polaroidIn .9s cubic-bezier(.2,1.3,.4,1) both; }
+  .polaroid {
+    background: #fff; padding: 8px 8px 0; border-radius: 4px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.35);
+    transform: rotate(var(--rot, 0deg));
+  }
+  .polaroid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 2px; }
+  .polaroid .cap { font-family: 'Jua'; color: #5a4a6a; text-align: center; padding: 8px 4px 10px; font-size: clamp(14px, 4vw, 18px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .intro-text {
     position: relative; z-index: 2; text-align: center;
     font-family: 'Jua'; color: #fff;
-    font-size: clamp(32px, 9vw, 64px); line-height: 1.35;
+    font-size: clamp(28px, min(8.5vw, 6.2vh), 56px); line-height: 1.35;
     text-shadow: 0 0 18px rgba(255,170,220,.9), 0 4px 0 #ff6fa5;
     padding: 0 12px;
   }
@@ -188,9 +199,29 @@
   .small-btn.alt { background: #fff; color: var(--purple); box-shadow: 0 5px 0 #ddd3ff; }
   .small-btn:active { transform: translateY(4px); box-shadow: none; }
 
+  /* ---------- 5. 엔딩 ---------- */
+  .end-eyebrow { font-family: 'Jua'; color: var(--purple); font-size: 18px; text-align: center; }
+  #s-ending { z-index: 60; }   /* 하트가 사진·편지 뒤로 지나가도록 캔버스보다 위 */
+  .collage { position: relative; width: min(400px, 100%, 46vh); aspect-ratio: 1 / 1.08; margin: 18px 0 8px; }
+  .collage .polaroid { position: absolute; width: 54%; opacity: 0; }
+  .collage .polaroid:nth-child(1) { left: 0; top: 0; --rot: -7deg; }
+  .collage .polaroid:nth-child(2) { right: 0; top: 5%; --rot: 6deg; }
+  .collage .polaroid:nth-child(3) { left: 23%; top: 40%; --rot: -2deg; }
+  .collage.play .polaroid { animation: polaroidIn .9s cubic-bezier(.2,1.3,.4,1) both; }
+  .collage.play .polaroid:nth-child(2) { animation-delay: .5s; }
+  .collage.play .polaroid:nth-child(3) { animation-delay: 1s; }
+  .end-letter {
+    width: min(420px, 100%); background: var(--paper); border-radius: 22px;
+    padding: 20px 22px; text-align: center; box-shadow: 0 14px 34px rgba(255,111,165,.22);
+    animation: slideUp .8s 1.6s ease-out both;
+  }
+  .end-letter .say { font-size: 18px; line-height: 1.8; white-space: pre-line; word-break: keep-all; }
+  .end-letter .sign { margin-top: 12px; font-family: 'Jua'; color: #a0789a; }
+  #s-ending .after-btns { animation: slideUp .8s 2.2s ease-out both; }
+
   /* ---------- 쿠폰 ---------- */
   .modal {
-    position: fixed; inset: 0; z-index: 45;
+    position: fixed; inset: 0; z-index: 70;
     background: rgba(40,20,60,.55);
     display: flex; align-items: center; justify-content: center; padding: 16px;
     opacity: 0; visibility: hidden; transition: opacity .4s, visibility .4s;
@@ -223,6 +254,10 @@
   @keyframes twinkle { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
   @keyframes dropIn { from { opacity: 0; transform: translateY(-60px) scale(.3) rotate(-20deg); } to { opacity: 1; transform: none; } }
   @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+  @keyframes polaroidIn {
+    from { opacity: 0; transform: translateY(-70vh) rotate(calc(var(--rot, 0deg) + 25deg)) scale(.8); }
+    to   { opacity: 1; transform: rotate(var(--rot, 0deg)); }
+  }
   @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
   @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
@@ -263,7 +298,10 @@
 <section id="s-intro" class="screen" aria-live="polite">
   <div class="rays"></div>
   <div class="stars" id="stars"></div>
-  <div class="intro-text" id="introText"></div>
+  <div class="intro-stage">
+    <div class="pile" id="pile"></div>
+    <div class="intro-text" id="introText"></div>
+  </div>
   <div class="progress"><div id="introBar"></div></div>
 </section>
 
@@ -294,7 +332,19 @@
     <p class="prize-sub">선물 상자 하나를 골라봐!</p>
     <div class="boxes" id="boxes"></div>
     <p id="prizeHint" aria-live="polite"></p>
-    <div class="after-btns" id="afterBtns">
+  </div>
+</section>
+
+<!-- 5. 엔딩 -->
+<section id="s-ending" class="screen">
+  <div class="wrap">
+    <p class="end-eyebrow">📸 아빠랑 지윤이의 소중한 순간들</p>
+    <div class="collage" id="collage"></div>
+    <div class="end-letter">
+      <p class="say" id="endMsg"></p>
+      <p class="sign" id="endSign"></p>
+    </div>
+    <div class="after-btns show">
       <button class="small-btn" id="reopenCoupon">🎟️ 쿠폰 다시 보기</button>
       <button class="small-btn alt" id="restartBtn">↺ 처음부터</button>
     </div>
@@ -337,13 +387,21 @@ const CONFIG = {
   issuer: '아빠 💕',
 
   introSeconds: 10,        // 모션그래픽 시간(초)
-  introLines: [            // 모션그래픽 문구 (한 줄 = 배열 하나)
-    ['두근두근… 💓'],
-    ['지윤아!'],
-    ['정말 정말', '축하해! 🎉'],
-    ['특별한 선물이', '기다리고 있어 🎁'],
-    ['그 전에!', '퀴즈 5문제', '도전! 🧩'],
+  // 사진 (photos 폴더) — 모션그래픽과 엔딩 화면에 나옵니다
+  photos: [
+    { src: 'photos/1.jpg', caption: '환경 삼총사 발표 날 🌍' },
+    { src: 'photos/2.jpg', caption: '아빠랑 햄버거 데이트 🍔' },
+    { src: 'photos/3.jpg', caption: '반짝반짝 겨울밤 ✨' },
   ],
+  introLines: [            // 모션그래픽 문구 (rows = 줄, photo = 함께 떨어질 사진 번호)
+    { rows: ['두근두근… 💓'] },
+    { rows: ['지윤아!'], photo: 0 },
+    { rows: ['정말 정말', '축하해! 🎉'], photo: 1 },
+    { rows: ['특별한 선물이', '기다리고 있어 🎁'], photo: 2 },
+    { rows: ['그 전에!', '퀴즈 5문제 도전! 🧩'] },
+  ],
+  endMessage: '지윤아, 아빠 딸로 와줘서 고마워.\n곧 중학생이 될 지윤이의 모든 날을\n아빠가 항상 응원할게.\n사랑해 💕',
+  endSign: '— 세상에서 지윤이를 제일 사랑하는 아빠가',
 
   // answer = 정답 보기 번호 (0부터 시작: 첫 번째=0, 두 번째=1 …), 'all' = 모든 보기가 정답
   // msg  = 정답을 맞히면 나오는 아빠의 한마디
@@ -389,6 +447,23 @@ $('#cardFrom').textContent = CONFIG.from;
 $('#cTitle').textContent = `${CONFIG.nick} 전용 용돈 쿠폰`;
 $('#cAmount').innerHTML = `${CONFIG.prizeAmount}<small>원</small>`;
 $('#cIssuer').textContent = CONFIG.issuer;
+$('#endMsg').textContent = CONFIG.endMessage;
+$('#endSign').textContent = CONFIG.endSign;
+
+/* ---------- 사진 ---------- */
+function polaroid(i, rot) {
+  const p = CONFIG.photos[i];
+  const el = document.createElement('figure');
+  el.className = 'polaroid';
+  if (rot != null) el.style.setProperty('--rot', rot + 'deg');
+  const img = document.createElement('img');
+  img.src = p.src; img.alt = p.caption; img.decoding = 'async';
+  const cap = document.createElement('figcaption');
+  cap.className = 'cap'; cap.textContent = p.caption;
+  el.append(img, cap);
+  return el;
+}
+CONFIG.photos.forEach(p => { new Image().src = p.src; });   // 미리 불러오기
 
 /* ---------- 사운드 (Web Audio, 외부 파일 없음) ---------- */
 let actx = null, master = null, soundOn = true;
@@ -481,6 +556,12 @@ function burst(x, y, hue) {
       col: `hsl(${hue + rnd(-25, 25)},100%,${rnd(60, 75)}%)`, life: rnd(55, 85), max: 85, sz: rnd(1.6, 3) });
   }
 }
+function hearts(n = 30) {
+  for (let i = 0; i < cut(n); i++) {
+    P.push({ k: 'h', x: rnd(0, W), y: H + rnd(20, H * .8), vy: -rnd(1.2, 2.6), r: rnd(0, 6.28),
+      sz: rnd(18, 32), em: pick(['💖', '💕', '💗', '🤍']) });
+  }
+}
 function rocket() {
   const ty = rnd(H * .12, H * .42);
   P.push({ k: 'r', x: rnd(W * .12, W * .88), y: H + 10, vx: rnd(-.8, .8),
@@ -504,11 +585,15 @@ function tick() {
       ctx.fillStyle = p.col; ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, 6.283); ctx.fill();
       ctx.globalAlpha = 1;
       if (p.life <= 0) P.splice(i, 1);
-    } else {
+    } else if (p.k === 'r') {
       p.vy += .08; p.x += p.vx; p.y += p.vy;
       ctx.strokeStyle = `hsl(${p.hue},100%,80%)`; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 3, p.y - p.vy * 3); ctx.stroke();
       if (p.y <= p.ty || p.vy > -.5) { burst(p.x, p.y, p.hue); sfx.pop(); P.splice(i, 1); }
+    } else if (p.k === 'h') {
+      p.y += p.vy; p.r += .03; p.x += Math.sin(p.r) * .8;
+      ctx.font = `${p.sz}px serif`; ctx.fillText(p.em, p.x, p.y);
+      if (p.y < -40) P.splice(i, 1);
     }
   }
   requestAnimationFrame(tick);
@@ -531,11 +616,17 @@ const graphemes = s => window.Intl && Intl.Segmenter
   ? [...new Intl.Segmenter('ko', { granularity: 'grapheme' }).segment(s)].map(x => x.segment)
   : [...s];
 
-function showLine(rows) {
+const PILE_ROT = [-6, 5, -2];
+function showLine(line) {
+  if (line.photo != null) {
+    const pile = $('#pile');
+    pile.appendChild(polaroid(line.photo, PILE_ROT[pile.children.length % PILE_ROT.length]));
+    sfx.pop();
+  }
   const el = $('#introText');
   el.innerHTML = '';
   let k = 0;
-  rows.forEach(row => {
+  line.rows.forEach(row => {
     const r = document.createElement('span'); r.className = 'row';
     row.split(' ').forEach((word, wi) => {
       if (wi) r.appendChild(document.createTextNode(' '));
@@ -702,7 +793,6 @@ function pickBox(b) {
   setTimeout(() => {
     $('#prizeHint').textContent = '나머지는 전부 꽝이었어! 지윤이 운 최고 🍀';
     openCoupon();
-    $('#afterBtns').classList.add('show');
   }, 1400 + others.length * 240 + 700);
 }
 
@@ -714,7 +804,21 @@ function openCoupon() {
   $('#couponModal').classList.add('show');
   sfx.fanfare(); rain(100);
 }
-$('#closeCoupon').onclick = () => $('#couponModal').classList.remove('show');
+$('#closeCoupon').onclick = () => {
+  $('#couponModal').classList.remove('show');
+  if ($('#s-prize').classList.contains('active')) setTimeout(showEnding, 400);
+};
+
+/* ---------- 5. 엔딩 (사진 + 아빠 편지) ---------- */
+function showEnding() {
+  const c = $('#collage');
+  c.innerHTML = '';
+  CONFIG.photos.forEach((_, i) => c.appendChild(polaroid(i)));
+  show('s-ending');
+  requestAnimationFrame(() => c.classList.add('play'));
+  hearts(40);
+  setTimeout(() => hearts(30), 2500);
+}
 $('#reopenCoupon').onclick = openCoupon;
 $('#restartBtn').onclick = () => location.reload();
 </script>
