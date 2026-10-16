@@ -148,6 +148,16 @@
   .feedback { min-height: 30px; margin-top: 16px; font-family: 'Jua'; font-size: 19px; word-break: keep-all; }
   .feedback.ok { color: #2fae8c; }
   .feedback.no { color: #e0507f; }
+  .dad-msg {
+    display: none; margin-top: 14px;
+    background: #fff4d6; border-radius: 18px; padding: 14px 18px;
+    text-align: left; word-break: keep-all;
+  }
+  .dad-msg.show { display: block; animation: slideUp .5s ease-out both; }
+  .dad-msg .who { font-family: 'Jua'; color: #d98a00; font-size: 15px; margin-bottom: 4px; }
+  .dad-msg .say { font-size: 17px; line-height: 1.7; white-space: pre-line; }
+  .next-btn { display: none; margin: 16px auto 0; }
+  .next-btn.show { display: block; animation: slideUp .5s .6s ease-out both; }
 
   /* ---------- 4. 경품 ---------- */
   .prize-title { font-family: 'Jua'; font-weight: 400; font-size: clamp(28px, 8vw, 40px); color: var(--pink); text-shadow: 0 3px 0 #fff; text-align: center; }
@@ -213,6 +223,7 @@
   @keyframes twinkle { 0%,100% { opacity: .2; } 50% { opacity: 1; } }
   @keyframes dropIn { from { opacity: 0; transform: translateY(-60px) scale(.3) rotate(-20deg); } to { opacity: 1; transform: none; } }
   @keyframes slideIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
   @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
   @keyframes shake { 0%,100% { transform: translateX(0); } 20%,60% { transform: translateX(-8px); } 40%,80% { transform: translateX(8px); } }
   @keyframes wiggle { 0%,80%,100% { transform: rotate(0); } 85% { transform: rotate(-7deg); } 90% { transform: rotate(7deg); } 95% { transform: rotate(-4deg); } }
@@ -267,6 +278,11 @@
         <div class="options" id="options"></div>
       </div>
       <p class="feedback" id="feedback" aria-live="polite"></p>
+      <div class="dad-msg" id="dadMsg">
+        <p class="who">💬 아빠의 한마디</p>
+        <p class="say" id="dadSay"></p>
+      </div>
+      <button class="small-btn next-btn" id="nextBtn">다음 문제 ▶</button>
     </div>
   </div>
 </section>
@@ -298,7 +314,7 @@
       유효기간: 무기한 ♾️<br>
       <span id="cNo"></span>
     </div>
-    <div class="c-tip">📸 이 화면을 캡처해서 엄마·아빠에게 보여주세요!</div>
+    <div class="c-tip">📸 이 화면을 캡처해서 아빠에게 보여주세요!</div>
     <button class="small-btn" id="closeCoupon">확인 💖</button>
   </div>
 </div>
@@ -315,10 +331,10 @@ const CONFIG = {
   message:
     '6학년 지윤이,\n' +
     '요즘 하루하루 멋지게 자라는 모습이\n' +
-    '엄마·아빠는 정말 자랑스러워!\n' +
+    '아빠는 정말 자랑스러워!\n' +
     '작은 선물을 준비했으니\n아래 버튼을 눌러봐 😊',
-  from: '세상에서 지윤이를 제일 사랑하는\n엄마·아빠가 💕',
-  issuer: '엄마·아빠 💕',
+  from: '세상에서 지윤이를 제일 사랑하는\n아빠가 💕',
+  issuer: '아빠 💕',
 
   introSeconds: 10,        // 모션그래픽 시간(초)
   introLines: [            // 모션그래픽 문구 (한 줄 = 배열 하나)
@@ -329,20 +345,25 @@ const CONFIG = {
     ['그 전에!', '퀴즈 5문제', '도전! 🧩'],
   ],
 
-  // answer = 정답 보기 번호 (0부터 시작: 첫 번째=0, 두 번째=1 …)
+  // answer = 정답 보기 번호 (0부터 시작: 첫 번째=0, 두 번째=1 …), 'all' = 모든 보기가 정답
+  // msg  = 정답을 맞히면 나오는 아빠의 한마디
   quiz: [
-    { q: '지윤이는 지금 몇 학년일까? 🏫',
-      options: ['4학년', '5학년', '6학년', '중학교 1학년'], answer: 2 },
-    { q: '지윤이가 가장 좋아하는 음식은? 🍽️',            // ✏️ 실제 정보로 바꿔주세요
-      options: ['떡볶이', '마라탕', '치킨', '피자'], answer: 0,
-      hint: '맵고 쫄깃한 그것!' },
-    { q: '지윤이의 생일은 몇 월일까? 🎂',                // ✏️ 실제 정보로 바꿔주세요
-      options: ['3월', '5월', '8월', '11월'], answer: 1 },
-    { q: '엄마·아빠가 지윤이에게 제일 하고 싶은 말은? 💬',
-      options: ['숙제 다 했어?', '일찍 자야지!', '사랑해 💕', '밥 먹자~'], answer: 2,
-      hint: '가장 따뜻한 말을 골라봐!' },
-    { q: '세상에서 지윤이를 제일 사랑하는 사람은? 💖',
-      options: ['옆집 고양이', '담임 선생님', '엄마·아빠', '유튜브 알고리즘'], answer: 2 },
+    { q: '지윤이가 태어난 날, 아빠가 제일 먼저 한 일은? 👶',
+      options: ['회사에 자랑 전화', '지윤이 손가락 열 개 세어보기', '너무 떨려서 기절', '배고파서 밥 먹기'], answer: 1,
+      msg: '작은 손가락 열 개를 하나하나 세어봤어.\n그날부터 아빠는 세상에서 제일 부자가 됐어.' },
+    { q: '아빠 휴대폰 사진첩에 제일 많은 사진은? 📱',
+      options: ['맛집 음식', '회사 서류', '지윤이', '하늘 풍경'], answer: 2,
+      msg: '사진첩 절반이 지윤이야.\n한 장도 못 지우겠더라.' },
+    { q: '아빠가 퇴근길에 가장 기다리는 순간은? 🚪',
+      options: ['월급날', '현관문 열 때 들리는 지윤이 목소리', '오늘 저녁 메뉴', '소파에 눕기'], answer: 1,
+      msg: '아무리 힘든 날도\n지윤이 얼굴 보면 다 괜찮아져.' },
+    { q: '아빠가 지윤이를 사랑하는 크기는? 🌌',
+      options: ['우리 집만큼', '지구만큼', '우주만큼', '측정 불가!'], answer: 'all',
+      msg: '뭘 골라도 정답이야.\n아빠 사랑은 끝이 없거든.' },
+    { q: '아빠가 지윤이에게 꼭 하고 싶었던 말은? 💌',
+      options: ['똑바로 앉아', '숙제했니?', '아빠 딸로 태어나줘서 고마워', '안돼!'], answer: 2,
+      hint: '잔소리 말고, 아빠 마음속 진짜 말!',
+      msg: '지윤아, 아빠 딸로 와줘서 정말 고마워.\n6학년 된 거 축하해. 사랑해 💕' },
   ],
 
   boxCount: 6,
@@ -554,7 +575,7 @@ function startIntro() {
 }
 
 /* ---------- 3. 퀴즈 ---------- */
-const PRAISE = ['정답! 역시 지윤이 👏', '딩동댕! 천재인데? ✨', '맞았어! 대단해 💯', '정답! 엄마·아빠 감동 😭', '완벽해! 🎯'];
+const PRAISE = ['정답! 역시 지윤이 👏', '딩동댕! 천재인데? ✨', '맞았어! 대단해 💯', '정답! 아빠 감동 😭', '완벽해! 🎯'];
 const OOPS = ['땡! 다시 골라봐 🤭', '아쉽다~ 한 번 더! 💪', '음… 다른 걸 골라볼까? 🤔'];
 let qi = 0, locked = false;
 
@@ -577,6 +598,8 @@ function renderQ() {
   $('#qnum').textContent = `문제 ${qi + 1} / ${CONFIG.quiz.length}`;
   $('#qtext').textContent = q.q;
   feedback('');
+  $('#dadMsg').classList.remove('show');
+  $('#nextBtn').classList.remove('show');
   const box = $('#options'); box.innerHTML = '';
   q.options.forEach((t, i) => {
     const b = document.createElement('button');
@@ -589,16 +612,33 @@ function renderQ() {
 function choose(btn, i) {
   if (locked || btn.disabled) return;
   const q = CONFIG.quiz[qi];
-  if (i === q.answer) {
+  if (q.answer === 'all' || i === q.answer) {
     locked = true;
     btn.classList.add('correct');
     sfx.correct();
     const [x, y] = centerOf(btn); confetti(x, y, 45, 9);
-    feedback(pick(PRAISE), 'ok');
-    setTimeout(() => {
-      qi++; renderDots();
-      qi < CONFIG.quiz.length ? renderQ() : finishQuiz();
-    }, 1200);
+    if (q.answer === 'all') {
+      // 반전: 나머지 보기도 하나씩 정답으로 바뀜
+      [...document.querySelectorAll('#options .opt')].filter(b => b !== btn)
+        .forEach((b, k) => setTimeout(() => { b.classList.add('correct'); sfx.pop(); }, 400 + k * 250));
+      feedback('어떤 걸 골라도 정답! 🎉', 'ok');
+    } else {
+      feedback(pick(PRAISE), 'ok');
+    }
+    const last = qi === CONFIG.quiz.length - 1;
+    const goNext = () => { qi++; renderDots(); last ? finishQuiz() : renderQ(); };
+    if (q.msg) {
+      setTimeout(() => {
+        $('#dadSay').textContent = q.msg;
+        $('#dadMsg').classList.add('show');
+        const nb = $('#nextBtn');
+        nb.textContent = last ? '선물 받으러 가기 🎁' : '다음 문제 ▶';
+        nb.onclick = () => { nb.classList.remove('show'); goNext(); };
+        nb.classList.add('show');
+      }, q.answer === 'all' ? 1300 : 700);
+    } else {
+      setTimeout(goNext, 1200);
+    }
   } else {
     btn.classList.add('wrong'); btn.disabled = true;
     sfx.wrong();
@@ -609,6 +649,7 @@ function finishQuiz() {
   $('#qnum').textContent = '';
   $('#qtext').textContent = '🎉 5문제 모두 정답! 🎉';
   $('#options').innerHTML = '';
+  $('#dadMsg').classList.remove('show');
   feedback('이제 선물을 고르러 가자! 🎁', 'ok');
   sfx.fanfare(); rain(160);
   setTimeout(showPrize, 2000);
